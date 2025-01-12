@@ -12,20 +12,19 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["services/basket/Basket.API/Basket.API.csproj", "services/basket/Basket.API/"]
-COPY ["buildingBlocks/BuildingBlocks/BuildingBlocks.csproj", "buildingBlocks/BuildingBlocks/"]
-RUN dotnet restore "./services/basket/Basket.API/Basket.API.csproj"
+COPY ["services/discount/Discount.GRPC/Discount.GRPC.csproj", "services/discount/Discount.GRPC/"]
+RUN dotnet restore "./services/discount/Discount.GRPC/Discount.GRPC.csproj"
 COPY . .
-WORKDIR "/src/services/basket/Basket.API"
-RUN dotnet build "./Basket.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/services/discount/Discount.GRPC"
+RUN dotnet build "./Discount.GRPC.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Basket.API.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./Discount.GRPC.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Basket.API.dll"]
+ENTRYPOINT ["dotnet", "Discount.GRPC.dll"]

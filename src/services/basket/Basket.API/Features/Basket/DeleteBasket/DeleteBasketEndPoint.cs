@@ -12,7 +12,7 @@ namespace Basket.API.Features.Basket.DeleteBasket
 		{
 			app.MapDelete("/baskets/{userName}", async (string username ,ISender sender) =>
 			{
-				var result = sender.Send(new DeleteBasketCommand(username));
+				var result =await sender.Send(new DeleteBasketCommand(username));
 
 				var response = result.Adapt<DeleteBasketResponse>();
 

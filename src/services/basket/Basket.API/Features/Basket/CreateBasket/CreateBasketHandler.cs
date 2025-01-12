@@ -1,4 +1,6 @@
 ﻿
+using Basket.API.Data;
+
 namespace Basket.API.Features.Basket.CreateBasket
 {
 	public record CreateBasketCommand(ShoppingCart Cart) : ICommand<CreateBasketResult>;
@@ -13,13 +15,13 @@ namespace Basket.API.Features.Basket.CreateBasket
 		}
     }
 
-	public class CreateBasketCommandHandler() : ICommandHandler<CreateBasketCommand, CreateBasketResult>
+	public class CreateBasketCommandHandler(IBasketRepository basketRepository) : ICommandHandler<CreateBasketCommand, CreateBasketResult>
 	{
 		public async Task<CreateBasketResult> Handle(CreateBasketCommand command, CancellationToken cancellationToken)
 		{
-			ShoppingCart cart = command.Cart;
+			var basket = await basketRepository.CreateBasket(command.Cart, cancellationToken);
 
-			return new CreateBasketResult("Ahmed");
+			return new CreateBasketResult(basket.UserName);
 		}
 	}
 }
