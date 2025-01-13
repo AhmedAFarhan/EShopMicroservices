@@ -1,5 +1,6 @@
 ﻿
 using Basket.API.Data;
+using Discount.GRPC.Protos;
 
 namespace Basket.API.Features.Basket.CreateBasket
 {
@@ -15,13 +16,20 @@ namespace Basket.API.Features.Basket.CreateBasket
 		}
     }
 
-	public class CreateBasketCommandHandler(IBasketRepository basketRepository) : ICommandHandler<CreateBasketCommand, CreateBasketResult>
+	public class CreateBasketCommandHandler(IBasketRepository basketRepository, DiscountProtoService.DiscountProtoServiceClient discountService) : ICommandHandler<CreateBasketCommand, CreateBasketResult>
 	{
 		public async Task<CreateBasketResult> Handle(CreateBasketCommand command, CancellationToken cancellationToken)
 		{
+			foreach(var product in command.Cart.Items)
+			{
+				var coupon = await discountService.GetDiscountAsync(new GetDiscountRequest { ProductName = product.ProductName}, cancellationToken:cancellationToken);
+				product.Price -= coupon.Amount; 
+			}
+
 			var basket = await basketRepository.CreateBasket(command.Cart, cancellationToken);
 
 			return new CreateBasketResult(basket.UserName);
 		}
 	}
+
 }
